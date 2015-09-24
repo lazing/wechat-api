@@ -1,0 +1,1 @@
+require 'wechat/api'
