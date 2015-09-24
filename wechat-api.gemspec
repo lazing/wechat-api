@@ -8,7 +8,7 @@ Gem::Specification.new do |spec|
   spec.version       = Wechat::Api::VERSION
   spec.authors       = ["Ryan Wong"]
   spec.email         = ["lazing@gmail.com"]
-  spec.summary       = %q{UCPAAS API wrapper}
+  spec.summary       = %q{Wechat API wrapper}
   spec.homepage      = "https://github.com/lazing/wechat-api"
   spec.license       = "MIT"
 
