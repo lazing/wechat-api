@@ -4,6 +4,8 @@ https://github.com/lazing/wechat-api
 
 用于微信 api 调用（非服务端推送信息）的处理。
 
+[![Circle CI](https://circleci.com/gh/lazing/wechat-api.svg?style=svg)](https://circleci.com/gh/lazing/wechat-api)
+
 常见的应用场景如：
 * 获取关注用户
 * 推送模板信息
