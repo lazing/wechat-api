@@ -37,14 +37,13 @@ module Wechat
       end
 
       def refresh
-        logger.debug { 'refresh token' }
         url = format('%stoken', API_BASE)
         resp = connection.get(url, token_params)
         response = MultiJson.load(resp.body)
         return handle_error(response) if response['errcode']
-        token = response['access_token']
+        @access_token = response['access_token']
         File.open(@token_file, 'w') { |f| f.write(resp.body) } if token
-        token
+        @access_token
       end
 
       def get(uri, params = {})
