@@ -42,7 +42,7 @@ module Wechat
         response = MultiJson.load(resp.body)
         return handle_error(response) if response['errcode']
         @access_token = response['access_token']
-        File.open(@token_file, 'w') { |f| f.write(resp.body) } if token
+        File.open(@token_file, 'w') { |f| f.write(resp.body) } if @access_token
         @access_token
       end
 
