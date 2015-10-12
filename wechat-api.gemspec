@@ -17,8 +17,11 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_runtime_dependency "faraday", "~> 0.9"
-  spec.add_runtime_dependency "multi_json", "~> 1.2"
+  spec.add_runtime_dependency "faraday", ">= 0.9"
+  spec.add_runtime_dependency "rest-client", ">= 1.7.0"
+  spec.add_runtime_dependency "multi_json", ">= 1.2"
+  spec.add_runtime_dependency 'gyoku', '>= 1.0.0'
+  spec.add_runtime_dependency 'nori'
   spec.add_development_dependency "bundler"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "pry"
