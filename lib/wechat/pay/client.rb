@@ -32,7 +32,7 @@ module Wechat
       def initialize(mch_id, wxappid, opts = {})
         @mch_id = mch_id
         @wxappid = wxappid
-        @opts = opts.map { |k, v| [k.to_sym, v] }.to_h
+        @opts = Hash[opts.map { |k, v| [k.to_sym, v] }]
         unless (REQUIRED_OPTS - @opts.keys).empty?
           fail format('%s required', REQUIRED_OPTS.join(','))
         end
@@ -97,7 +97,7 @@ module Wechat
 
       def trim_and_sort(params)
         params.delete_if { |_k, v| v.blank? }
-        params.sort.to_h
+        Hash[params.sort]
       end
 
       def merge(params)
