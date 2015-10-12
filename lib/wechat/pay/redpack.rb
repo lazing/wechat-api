@@ -8,7 +8,8 @@ module Wechat
         post\
           '/mmpaymkttransfers/sendredpack',
           params.merge(
-            mch_billno: transaction_id, wxappid: @wxappid, re_openid: openid
+            mch_billno: tran_id(transaction_id),
+            wxappid: @wxappid, re_openid: openid
           )
       end
 
@@ -16,17 +17,23 @@ module Wechat
         post\
           '/mmpaymkttransfers/sendgroupredpack',
           params.merge(
-            mch_billno: transaction_id, wxappid: @wxappid, re_openid: openid
+            mch_billno: tran_id(transaction_id),
+            wxappid: @wxappid, re_openid: openid
           )
       end
 
       def redpack_info(transaction_id)
         post\
           '/mmpaymkttransfers/gethbinfo',
-          mch_billno: transaction_id, bill_type: 'MCHT', appid: @wxappid
+          mch_billno: tran_id(transaction_id),
+          bill_type: 'MCHT', appid: @wxappid
       end
 
       private
+
+      def tran_id(origin)
+        format('%s%s', @mch_id, origin)
+      end
     end
   end
 end
