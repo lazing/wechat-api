@@ -44,8 +44,10 @@ module Wechat
       def post(path, params)
         merged_params = merge(params)
         logger.debug { merged_params }
-        resp = resource(path).post xml(sign(merged_params))
+        resp = resource(path).post(xml(sign(merged_params)))
         handle(resp)
+      rescue RestClient::ExceptionWithResponse => err
+        raise PayError, err.response
       end
 
       private
