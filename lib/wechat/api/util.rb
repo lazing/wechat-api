@@ -27,6 +27,11 @@ module Wechat
 
         post 'qrcode/create', params
       end
+
+      def js_ticket
+        res = get 'ticket/getticket', type: :jsapi
+        res['ticket']
+      end
     end
   end
 end
