@@ -1,0 +1,117 @@
+require 'multi_json'
+require 'faraday'
+require 'logger'
+
+module Wechat
+  module Qy
+    #
+    class ResponseError < StandardError; end
+    class AccessTokenExpiredError < ResponseError; end
+    #
+    class Client
+
+      API_BASE = 'https://qyapi.weixin.qq.com/cgi-bin/'
+
+      attr_reader :corp_id, :corp_secret
+      attr_accessor :logger
+
+      def initialize(corp_id, corp_secret)
+        @corp_id, @corp_secret = corp_id, corp_secret
+        @logger = Logger.new(STDOUT)
+        @token_file = File.join('/tmp', "wechat-api-#{corp_id}")
+      end
+
+      def access_token
+        @access_token ||= begin
+          token = MultiJson.load(File.read(@token_file))
+          token['access_token']
+        rescue
+          refresh
+        end
+      end
+
+      def refresh
+        url = format('%sgettoken', API_BASE)
+        resp = connection.get(url, token_params)
+        response = MultiJson.load(resp.body)
+        return handle_error(response) if response['errcode']
+        @access_token = response['access_token']
+        File.open(@token_file, 'w') { |f| f.write(resp.body) } if @access_token
+        @access_token
+      end
+
+      def get(uri, params = {})
+        with_access_token(uri, params) do |url, params_with_token|
+          debug_request do
+            connection.get do |req|
+              req.url url, params_with_token
+              req.headers[:accept] = 'application/json'
+              req.headers[:content_type] = 'application/json'
+            end
+          end
+        end
+      end
+
+      def post(uri, data = {})
+        with_access_token(uri, {}) do |url, params|
+          logger.debug { [:data, data] }
+          debug_request do
+            connection.post do |req|
+              req.url url, params
+              req.headers[:accept] = 'application/json'
+              req.headers[:content_type] = 'application/json'
+              req.body = MultiJson.dump(data)
+            end
+          end
+        end
+      end
+
+      def with_access_token(uri, params, tried = 2)
+        url = format('%s%s', API_BASE, uri)
+        begin
+          resp = yield(url, params.merge(access_token: access_token))
+          response = MultiJson.load(resp.body)
+          handle_error(response)
+        rescue AccessTokenExpiredError => e
+          refresh
+          retry unless (tried -= 1).zero?
+          raise e
+        end
+      end
+
+      private
+
+      def debug_request
+        response = yield
+        logger.debug { response }
+        response
+      end
+
+      def handle_error(response)
+        case response['errcode']
+        when 0, nil
+          response
+        when 40_001, 42_001, 40_014
+          fail AccessTokenExpiredError, response
+        else
+          fail ResponseError, response
+        end
+      end
+
+      def token_params
+        {
+          corpid: corp_id,
+          corpsecret: corp_secret
+        }
+      end
+
+      def connection
+        @connection ||= begin
+          Faraday.new do |faraday|
+            faraday.adapter Faraday.default_adapter
+          end
+        end
+      end
+    end
+  end
+end

@@ -21,6 +21,12 @@ https://github.com/lazing/wechat-api
 * 不够简单，特别是用于多账号管理的时候
 * 微信 api 更新频繁，需要易于使用新功能
 
+## 主要功能清单
+* 支持微信服务号和订阅号API
+* 支持微信js_ticket获取
+* 支持微信红包API
+* 支持微信企业号主动调用API
+
 ## 使用方式
 
 ````ruby
@@ -30,13 +36,23 @@ gem 'wechat-api'
 ````ruby
 require 'wechat-api'
 
-client = Wechat::Api::Client.new 'appid', 'appsecret'
+api = Wechat::Api::Client.new 'appid', 'appsecret'
 
-client.get 'user/info', nextopenid: 'xxx'
+api.get 'user/info', nextopenid: 'xxx'
 # 当使用 get 方式时，hash 参数将做个 query params 附在请求后
 
-client.post 'user/info/updateremark', openid；'xxxx', remark: '我是注释'
+api.post 'user/info/updateremark', openid；'xxxx', remark: '我是注释'
 # 当使用 post 方法时，hash 参数将转换为 json，因此可以支持嵌套的结构
+````
+
+微信企业号主动调用API
+
+````ruby
+require 'wechat-api'
+
+qy = Wechat::Qy::Client.new 'corpid', 'corpsecret'
+qy.text_send 'agentid', 'message', touser: 'UserId1|UserId2' #提供的预定义方法
+qy.post 'api/uri', { key: :value} #未提供预定义方法时调用
 ````
 
 ## 一些预定义方法
@@ -47,13 +63,13 @@ client.post 'user/info/updateremark', openid；'xxxx', remark: '我是注释'
 
 ````ruby
 # 创建固定二维码
-client.create_qrcode(scene_str)
+api.create_qrcode(scene_str)
 
 # 创建临时二维码
-client.create_qrcode_temp(scene_id)
+api.create_qrcode_temp(scene_id)
 
 # 发送模板消息
-client.send_template(template_id, openid, url, data = {})
+api.send_template(template_id, openid, url, data = {})
 ````
 
 以上接口返回微信文档定义的 json 数据转换后的ruby的 hash 对象
