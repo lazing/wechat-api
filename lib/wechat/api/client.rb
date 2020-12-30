@@ -76,6 +76,8 @@ module Wechat
         url = format('%s%s', base_url, uri)
         begin
           resp = yield(url, params.merge(access_token: access_token))
+          raise ResponseError, resp unless resp.success?
+
           response = MultiJson.load(resp.body)
           handle_error(response)
         rescue AccessTokenExpiredError => e
