@@ -19,7 +19,7 @@ module Wechat
       API_BASE = 'https://api.weixin.qq.com/cgi-bin/'
 
       attr_reader :app_id, :secret
-      attr_accessor :logger
+      attr_accessor :logger, :site
 
       def initialize(app_id, secret)
         @app_id, @secret = app_id, secret
@@ -37,10 +37,11 @@ module Wechat
       end
 
       def refresh
-        url = format('%stoken', API_BASE)
+        url = format('%stoken', base_url)
         resp = connection.get(url, token_params)
         response = MultiJson.load(resp.body)
         return handle_error(response) if response['errcode']
+
         @access_token = response['access_token']
         File.open(@token_file, 'w') { |f| f.write(resp.body) } if @access_token
         @access_token
@@ -72,7 +73,7 @@ module Wechat
       end
 
       def with_access_token(uri, params, tried = 2)
-        url = format('%s%s', API_BASE, uri)
+        url = format('%s%s', base_url, uri)
         begin
           resp = yield(url, params.merge(access_token: access_token))
           response = MultiJson.load(resp.body)
@@ -86,6 +87,10 @@ module Wechat
 
       private
 
+      def base_url
+        site || API_BASE
+      end
+
       def debug_request
         response = yield
         logger.debug { response }
@@ -97,9 +102,9 @@ module Wechat
         when 0, nil
           response
         when 40_001, 42_001, 40_014
-          fail AccessTokenExpiredError, response
+          raise AccessTokenExpiredError, response
         else
-          fail ResponseError, response
+          raise ResponseError, response
         end
       end
 
