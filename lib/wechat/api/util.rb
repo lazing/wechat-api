@@ -1,3 +1,6 @@
+require 'securerandom'
+require 'digest/sha1'
+
 module Wechat
   module Api
     #
@@ -31,6 +34,23 @@ module Wechat
       def js_ticket
         res = get 'ticket/getticket', type: :jsapi
         res['ticket']
+      end
+
+      def sign(params)
+        str = params.to_a.sort.map { |p| p.join('=') }.join('&')
+        logger.debug { "to_sign: #{str}" }
+        Digest::SHA1.hexdigest str
+      end
+
+      def js_config(url: nil)
+        r = ticket.tap { |j| j.refresh if j.expired? }.ticket
+        nonce = SecureRandom.hex
+        timestamp = Time.now.to_i
+        signature = sign(noncestr: nonce, timestamp: timestamp, jsapi_ticket: r, url: url)
+        {
+          appId: app_id, timestamp: timestamp, nonceStr: nonce,
+          signature: signature
+        }.tap { |hash| logger.debug { "js_config: #{hash}, url: #{url}" } }
       end
     end
   end

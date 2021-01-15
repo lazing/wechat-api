@@ -2,6 +2,7 @@ require 'multi_json'
 require 'wechat/api/message'
 require 'wechat/api/user'
 require 'wechat/api/util'
+require 'wechat/api/js_ticket'
 require 'faraday'
 require 'logger'
 
@@ -18,12 +19,13 @@ module Wechat
 
       API_BASE = 'https://api.weixin.qq.com/cgi-bin/'
 
-      attr_reader :app_id, :secret
+      attr_reader :app_id, :secret, :ticket
       attr_accessor :logger, :site
 
       def initialize(app_id, secret)
         @app_id, @secret = app_id, secret
         @logger = Logger.new(STDOUT)
+        @ticket = JsTicket.new self
         @token_file = File.join('/tmp', "wechat-api-#{app_id}")
       end
 
