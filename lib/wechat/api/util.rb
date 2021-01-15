@@ -32,8 +32,7 @@ module Wechat
       end
 
       def js_ticket
-        res = get 'ticket/getticket', type: :jsapi
-        res['ticket']
+        get 'ticket/getticket', type: :jsapi
       end
 
       def sign(params)

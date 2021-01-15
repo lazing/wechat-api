@@ -9,8 +9,8 @@ module Wechat
 
       def refresh
         js = client.js_ticket
-        @ticket = js[:ticket]
-        @expires_at = DateTime.now + Rational(js[:expires_in].to_i, 3600*24)
+        @ticket = js['ticket']
+        @expires_at = DateTime.now + Rational(js['expires_in'].to_i, 3600 * 24)
         self
       end
 
