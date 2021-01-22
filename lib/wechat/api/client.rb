@@ -11,6 +11,7 @@ module Wechat
     #
     class ResponseError < StandardError; end
     class AccessTokenExpiredError < ResponseError; end
+    class SubscribeError < ResponseError; end
     #
     class Client
       include Message
@@ -107,6 +108,8 @@ module Wechat
           response
         when 40_001, 42_001, 40_014
           raise AccessTokenExpiredError, response
+        when 43_004
+          raise SubscribeError, response
         else
           raise ResponseError, response
         end
